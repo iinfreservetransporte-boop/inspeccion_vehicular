@@ -1,0 +1,1435 @@
+<!DOCTYPE html>
+<html lang='es'>
+<head>
+<meta charset='UTF-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0'>
+<title>Inspección Vehicular - Formulario Definitivo</title>
+<link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'>
+<style>
+    /* VARIABLES (Añadidas para consistencia) */
+    :root {
+        --primary: #004080;
+        --secondary: #6c757d;
+        --success: #28a745;
+        --danger: #dc3545;
+        --info-bg: #e6f7ff;
+        --fail-bg: #ffe6e6;
+        --ok-bg: #e6ffe6;
+    }
+
+    body { font-family: 'Segoe UI', Tahoma, sans-serif; background-color: #f4f4f4; margin: 0; padding: 0; }
+    
+    /* === MODIFICACIONES CLAVE EN EL HEADER PARA EL LOGO === */
+    header { 
+        background-color: var(--primary); 
+        color: white; 
+        padding: 10px 20px;
+        font-size: 1.8em; 
+        font-weight: bold; 
+        display: flex; /* Habilitar flexbox */
+        align-items: center; /* Alinear verticalmente */
+        justify-content: center; /* Centrar inicialmente el contenido */
+        position: relative; /* Para posicionar el logo absolutamente */
+    }
+    
+    /* Contenedor del Logo Izquierdo */
+    header .logo-container {
+        position: absolute;
+        left: 20px; /* Posicionar el logo a la izquierda */
+        top: 50%;
+        transform: translateY(-50%);
+    }
+
+    header .logo-container img {
+        height: 80px; /* TAMAÑO AUMENTADO */
+        width: auto;
+        background-color: white; /* Fondo blanco para el logo PNG */
+        padding: 5px;
+        border-radius: 4px;
+        max-width: 500px; /* ANCHO MÁXIMO AUMENTADO */
+    }
+    /* Fin de modificaciones en el HEADER */
+
+    section { background: white; margin: 20px auto; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); max-width: 1000px; }
+    h2 { color: var(--primary); border-bottom: 2px solid #ddd; padding-bottom: 5px; margin-top: 20px; font-size: 1.5em;}
+
+    /* ESTILO PARA LOS GRUPOS DE CAMPOS */
+    .form-group { margin-bottom: 15px; display: flex; flex-direction: column; }
+    .form-group label { font-weight: bold; margin-bottom: 5px; color: #333; }
+    .form-group input[type='text'], 
+    .form-group input[type='number'], 
+    .form-group input[type='date'], 
+    .form-group select,
+    .form-group textarea {
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        font-size: 1em;
+        width: 100%;
+        box-sizing: border-box; 
+    }
+    
+    /* GRUPO DE ACCIONES */
+    .actions {
+        display: flex;
+        justify-content: space-around;
+        gap: 10px;
+        margin-top: 30px;
+        padding-top: 15px;
+        border-top: 1px solid #eee;
+        flex-wrap: wrap;
+    }
+
+    /* BOTONES */
+    .btn {
+        background-color: var(--primary);
+        color: white;
+        padding: 12px 20px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 1em;
+        transition: background-color 0.3s ease;
+        flex-grow: 1;
+        max-width: 250px;
+    }
+    .btn:hover { background-color: #0056b3; }
+    .btn:nth-child(2) { background-color: #25D366; } /* WhatsApp */
+    .btn:nth-child(2):hover { background-color: #128C7E; }
+    .btn i { margin-right: 8px; }
+
+    /* Estilos para el checklist */
+    .checklist-table { 
+        width: 100%; 
+        border-collapse: collapse; 
+        margin-top: 10px;
+    }
+    .checklist-table th, .checklist-table td {
+        border: 1px solid #ddd;
+        padding: 10px;
+        text-align: left;
+    }
+    .checklist-table th {
+        background-color: var(--primary);
+        color: white;
+        text-align: center;
+    }
+    .checklist-table td:first-child { 
+        font-weight: bold;
+        width: 60%; 
+        color: #333;
+        text-align: left;
+    }
+    
+    /* COLORES DE FONDO PARA COLUMNAS B, M, N/A EN EL FORMULARIO */
+    .checklist-table tbody tr:not([style*="#f2f2f2"]) td:nth-child(2) {
+        background-color: #d4edda; /* B (Bueno) -> Verde Claro */
+    }
+    .checklist-table tbody tr:not([style*="#f2f2f2"]) td:nth-child(3) {
+        background-color: #f8d7da; /* M (Malo) -> Rojo Claro */
+    }
+    .checklist-table tbody tr:not([style*="#f2f2f2"]) td:nth-child(4) {
+        background-color: #fff3cd; /* N/A (No Aplica) -> Amarillo Claro */
+    }
+
+    .radio-group {
+        display: flex;
+        justify-content: space-around;
+    }
+    .radio-group label {
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+    }
+    
+    /* INFO PANELS (Conductor/Vehículo) */
+    .info-panel {
+        padding: 10px;
+        margin-top: 10px;
+        border-radius: 4px;
+        display: none; /* Inicialmente oculto */
+        font-size: 0.9em;
+        line-height: 1.6;
+        border: 1px solid #ddd;
+    }
+    .info-panel span {
+        display: block;
+    }
+    
+    /* Estados del panel */
+    .status-active { background-color: var(--ok-bg); border-color: var(--success); }
+    .status-inactive { background-color: var(--fail-bg); border-color: var(--danger); }
+    .status-warning { background-color: #fff3cd; border-color: #ffc107; color: #856404; }
+
+
+    /* Estilos para la previsualización de fotos */
+    #fotos-preview {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 10px;
+        border: 1px dashed #ccc;
+        padding: 10px;
+        border-radius: 4px;
+    }
+    #fotos-preview img {
+        width: 100px;
+        height: 100px;
+        object-fit: cover;
+        border-radius: 4px;
+        border: 1px solid #ddd;
+    }
+
+    /* === ESTILOS DE IMPRESIÓN (v07) === */
+    @media print {
+        @page { size: 8.5in 11in; margin: 0.5in; }
+        body { background:white; font-size:11px; line-height:1.2; }
+        /* Oculta formularios, botones, etc., solo muestra lo marcado como .print-only */
+        .actions, .btn, section:not(.print-only) { display:none !important; }
+
+        .print-only { display:block !important; padding: 0; margin: 0; max-width: 100%; box-shadow: none; }
+
+        /* HEADER DE IMPRESIÓN */
+        header { 
+            display: flex !important;
+            padding: 10px 0 !important;
+            justify-content: flex-start !important; /* Alinear a la izquierda */
+            align-items: center !important;
+            background-color: #fff !important; /* Blanco para impresión */
+            color: #000 !important;
+            border-bottom: 2px solid var(--primary);
+            position: relative;
+        }
+        header .logo-container {
+            position: static !important;
+            transform: none !important;
+        }
+        header .logo-container img {
+            height: 50px !important; /* TAMAÑO LIGERAMENTE MÁS GRANDE EN IMPRESIÓN */
+            padding: 0 !important;
+            background-color: transparent !important;
+            margin-right: 10px; /* Espacio entre logo y título */
+            max-width: 100px; /* ANCHO MÁXIMO AUMENTADO EN IMPRESIÓN */
+        }
+        header .title-container {
+            flex-grow: 1;
+            margin: 0 !important;
+            text-align: left !important; /* Alineación del texto a la izquierda en impresión */
+            font-size: 0.8em;
+            font-weight: normal;
+        }
+        header .title-container .main-title {
+            font-size: 1.2em;
+            color: var(--primary);
+            font-weight: bold;
+        }
+        header .title-container div {
+            font-size: 0.9em;
+            color: #333;
+            text-align: left;
+        }
+
+
+        table { width:100%; border-collapse:collapse; }
+        /* Bordes negros para impresión */
+        th, td { border:1px solid #000; padding:3px; font-size:10px; }
+        .section-title { font-weight:bold; text-align:center; background:#ddd; }
+
+        /* Estilos específicos para las tablas de datos generales */
+        .print-only .print-header-table { margin-bottom: 10px; }
+        .print-only .print-header-table td { width: 25%; }
+        /* Estilos específicos para la tabla de checklist (marcas X) */
+        .print-only .print-checklist-table th, .print-only .print-checklist-table td { text-align: center; }
+        .print-only .print-checklist-table td:first-child { text-align: left; width: 70%; }
+        
+        /* COLORES DE FONDO PARA LAS COLUMNAS B, M, N/A (Vista de impresión) */
+        .print-only .print-checklist-table td:nth-child(2) { 
+            background-color: #d4edda !important; 
+        }
+        .print-only .print-checklist-table td:nth-child(3) { 
+            background-color: #f8d7da !important;
+        }
+        .print-only .print-checklist-table td:nth-child(4) { 
+            background-color: #fff3cd !important;
+        }
+
+        /* Footer y Fotos */
+        footer { display:block; text-align:center; font-size:10px; margin-top:10px; }
+        #print-fotos-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            text-align: center;
+            page-break-inside: avoid;
+        }
+        #print-fotos-container div {
+            break-inside: avoid; /* Evita que las fotos se corten entre páginas */
+            width: 150px;
+        }
+        #print-fotos-container img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+        }
+    }
+    /* Estilo para ocultar la sección de impresión en la vista normal */
+    .print-only { display:none; }
+</style>
+</head>
+<body>
+<style>
+    body { font-family: Arial, sans-serif; margin: 20px; color: #333; }
+    header { display: flex; align-items: center; border-bottom: 4px solid #004080; padding-bottom: 10px; margin-bottom: 20px; }
+    header img { height: 60px; margin-right: 15px; }
+    header h1 { color: #004080; font-size: 24px; margin: 0; }
+    button { background-color: #004080; color: white; border: none; padding: 8px 12px; margin: 5px; cursor: pointer; border-radius: 4px; }
+    button:hover { background-color: #0066cc; }
+    canvas { margin-bottom: 10px; border: 1px solid #000; }
+</style>
+
+<header>
+    <img src='html logo infreserve01.png' alt='Logo Infreserve'>
+    <h1>Inspección Vehicular - Infreserve</h1>
+</header>
+
+
+<header>
+    <div class="logo-container">
+        <img src='html logo infreserve.PNG' alt='Logo Infreserve'>
+    </div>
+    
+    <div class="title-container">
+        <div class="main-title">Inspección Vehicular - Formulario Definitivo</div>
+        <div style='color:white;'>
+            <strong>N° Inspección:</strong> <span id="nroInspeccionDisplay">INS-20251125-820</span>
+            <span id="printNroInspeccion" style="display:none;"></span> 
+        </div>
+    </div>
+</header>
+
+<section>
+    <h2>Información General</h2>
+
+    <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+        <div class="form-group" style="flex: 1;">
+            <label for="fecha"><i class="fas fa-calendar-alt"></i> Fecha:</label>
+            <input type="date" id="fecha" required>
+        </div>
+        <div class="form-group" style="flex: 1;">
+            <label for="ruta"><i class="fas fa-route"></i> Ruta / Referencia:</label>
+            <input type="text" id="ruta" placeholder="Ej: PTY-CH3, Almacén, Taller">
+        </div>
+        <div class="form-group" style="flex: 1;">
+            <label for="kilometraje"><i class="fas fa-tachometer-alt"></i> Kilometraje (KM):</label>
+            <input type="number" id="kilometraje" placeholder="Ingrese KM actual" required>
+        </div>
+    </div>
+
+    <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+        <div class="form-group" style="flex: 1;">
+            <label for="conductor"><i class="fas fa-user-tie"></i> Conductor:</label>
+            <select id="conductor" onchange="mostrarConductor()" required>
+                <option value="">Seleccione...</option>
+                </select>
+            <div id="infoConductor" class="info-panel">
+                </div>
+        </div>
+        <div class="form-group" style="flex: 1;">
+            <label for="vehiculo"><i class="fas fa-truck"></i> Placa del Vehículo:</label>
+            <select id="vehiculo" onchange="mostrarVehiculo()" required>
+                <option value="">Seleccione...</option>
+                </select>
+            <div id="infoVehiculo" class="info-panel">
+                </div>
+        </div>
+    </div>
+</section>
+
+<section class="checklist-section">
+    <h2>Checklist de Inspección</h2>
+    
+    <table class="checklist-table">
+        <thead>
+            <tr>
+                <th rowspan="2" style="text-align: left;">Aspecto a Inspeccionar</th>
+                <th colspan="3">Estado</th>
+            </tr>
+            <tr>
+                <th>Bueno (B)</th>
+                <th>Malo (M)</th>
+                <th>No Aplica (N/A)</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr style="background-color: #f2f2f2;"><td colspan="4" data-name="title"><strong>A. ASPECTOS MECÁNICOS Y EXTERIORES</strong></td></tr>
+            <tr>
+                <td data-name="aceite_motor">Nivel de Aceite del Motor</td>
+                <td><div class="radio-group"><label><input type="radio" name="aceite_motor" value="B" required> B</label></div></td>
+                <td><div class="radio-group"><label><input type="radio" name="aceite_motor" value="M"> M</label></div></td>
+                <td><div class="radio-group"><label><input type="radio" name="aceite_motor" value="NA"> N/A</label></div></td>
+            </tr>
+            <tr>
+                <td data-name="liquido_frenos">Líquido de Frenos</td>
+                <td><div class="radio-group"><label><input type="radio" name="liquido_frenos" value="B" required> B</label></div></td>
+                <td><div class="radio-group"><label><input type="radio" name="liquido_frenos" value="M"> M</label></div></td>
+                <td><div class="radio-group"><label><input type="radio" name="liquido_frenos" value="NA"> N/A</label></div></td>
+            </tr>
+            <tr>
+                <td data-name="liquido_direccion">Líquido de Dirección</td>
+                <td><div class="radio-group"><label><input type="radio" name="liquido_direccion" value="B" required> B</label></div></td>
+                <td><div class="radio-group"><label><input type="radio" name="liquido_direccion" value="M"> M</label></div></td>
+                <td><div class="radio-group"><label><input type="radio" name="liquido_direccion" value="NA"> N/A</label></div></td>
+            </tr>
+            <tr>
+                <td data-name="refrigerante">Refrigerante (Agua)</td>
+                <td><div class="radio-group"><label><input type="radio" name="refrigerante" value="B" required> B</label></div></td>
+                <td><div class="radio-group"><label><input type="radio" name="refrigerante" value="M"> M</label></div></td>
+                <td><div class="radio-group"><label><input type="radio" name="refrigerante" value="NA"> N/A</label></div></td>
+            </tr>
+            <tr>
+                <td data-name="correas_mangueras">Correas de Motor y Mangueras</td>
+                <td><div class="radio-group"><label><input type="radio" name="correas_mangueras" value="B" required> B</label></div></td>
+                <td><div class="radio-group"><label><input type="radio" name="correas_mangueras" value="M"> M</label></div></td>
+                <td><div class="radio-group"><label><input type="radio" name="correas_mangueras" value="NA"> N/A</label></div></td>
+            </tr>
+            <tr>
+                <td data-name="motor_sin_fugas">Motor sin fugas visibles</td>
+                <td><div class="radio-group"><label><input type="radio" name="motor_sin_fugas" value="B" required> B</label></div></td>
+                <td><div class="radio-group"><label><input type="radio" name="motor_sin_fugas" value="M"> M</label></div></td>
+                <td><div class="radio-group"><label><input type="radio" name="motor_sin_fugas" value="NA"> N/A</label></div></td>
+            </tr>
+            <tr>
+                <td data-name="llantas">Llantas (Estado general, aire)</td>
+                <td><div class="radio-group"><label><input type="radio" name="llantas" value="B" required> B</label></div></td>
+                <td><div class="radio-group"><label><input type="radio" name="llantas" value="M"> M</label></div></td>
+                <td><div class="radio-group"><label><input type="radio" name="llantas" value="NA"> N/A</label></div></td>
+            </tr>
+            <tr>
+                <td data-name="llantas_repuesto">Llantas de Repuesto y Rines</td>
+                <td><div class="radio-group"><label><input type="radio" name="llantas_repuesto" value="B" required> B</label></div></td>
+                <td><div class="radio-group"><label><input type="radio" name="llantas_repuesto" value="M"> M</label></div></td>
+                <td><div class="radio-group"><label><input type="radio" name="llantas_repuesto" value="NA"> N/A</label></div></td>
+            </tr>
+            <tr>
+                <td data-name="limpiaparabrisas">Limpiaparabrisas y nivel de agua</td>
+                <td><div class="radio-group"><label><input type="radio" name="limpiaparabrisas" value="B" required> B</label></div></td>
+                <td><div class="radio-group"><label><input type="radio" name="limpiaparabrisas" value="M"> M</label></div></td>
+                <td><div class="radio-group"><label><input type="radio" name="limpiaparabrisas" value="NA"> N/A</label></div></td>
+            </tr>
+            <tr>
+                <td data-name="carroceria">Estado de la Carrocería (Golpes/Rayones)</td>
+                <td><div class="radio-group"><label><input type="radio" name="carroceria" value="B" required> B</label></div></td>
+                <td><div class="radio-group"><label><input type="radio" name="carroceria" value="M"> M</label></div></td>
+                <td><div class="radio-group"><label><input type="radio" name="carroceria" value="NA"> N/A</label></div></td>
+            </tr>
+            
+            <tr style="background-color: #f2f2f2;"><td colspan="4" data-name="title"><strong>B. CABINA, LUCES Y ACCESORIOS</strong></td></tr>
+            <tr>
+                <td data-name="tablero_medidores">Tablero y Medidores</td>
+                <td><div class="radio-group"><label><input type="radio" name="tablero_medidores" value="B" required> B</label></div></td>
+                <td><div class="radio-group"><label><input type="radio" name="tablero_medidores" value="M"> M</label></div></td>
+                <td><div class="radio-group"><label><input type="radio" name="tablero_medidores" value="NA"> N/A</label></div></td>
+            </tr>
+            <tr>
+                <td data-name="luces_bajas_altas">Luces Bajas/Altas</td>
+                <td><div class="radio-group"><label><input type="radio" name="luces_bajas_altas" value="B" required> B</label></div></td>
+                <td><div class="radio-group"><label><input type="radio" name="luces_bajas_altas" value="M"> M</label></div></td>
+                <td><div class="radio-group"><label><input type="radio" name="luces_bajas_altas" value="NA"> N/A</label></div></td>
+            </tr>
+            <tr>
+                <td data-name="luces_freno">Luces de Freno</td>
+                <td><div class="radio-group"><label><input type="radio" name="luces_freno" value="B" required> B</label></div></td>
+                <td><div class="radio-group"><label><input type="radio" name="luces_freno" value="M"> M</label></div></td>
+                <td><div class="radio-group"><label><input type="radio" name="luces_freno" value="NA"> N/A</label></div></td>
+            </tr>
+            <tr>
+                <td data-name="direccionales">Luces Direccionales y de Estacionamiento</td>
+                <td><div class="radio-group"><label><input type="radio" name="direccionales" value="B" required> B</label></div></td>
+                <td><div class="radio-group"><label><input type="radio" name="direccionales" value="M"> M</label></div></td>
+                <td><div class="radio-group"><label><input type="radio" name="direccionales" value="NA"> N/A</label></div></td>
+            </tr>
+            <tr>
+                <td data-name="luces_retroceso">Luces de Retroceso</td>
+                <td><div class="radio-group"><label><input type="radio" name="luces_retroceso" value="B" required> B</label></div></td>
+                <td><div class="radio-group"><label><input type="radio" name="luces_retroceso" value="M"> M</label></div></td>
+                <td><div class="radio-group"><label><input type="radio" name="luces_retroceso" value="NA"> N/A</label></div></td>
+            </tr>
+            <tr>
+                <td data-name="claxon">Claxon (Bocina)</td>
+                <td><div class="radio-group"><label><input type="radio" name="claxon" value="B" required> B</label></div></td>
+                <td><div class="radio-group"><label><input type="radio" name="claxon" value="M"> M</label></div></td>
+                <td><div class="radio-group"><label><input type="radio" name="claxon" value="NA"> N/A</label></div></td>
+            </tr>
+            <tr>
+                <td data-name="freno_estacionamiento">Freno de Estacionamiento</td>
+                <td><div class="radio-group"><label><input type="radio" name="freno_estacionamiento" value="B" required> B</label></div></td>
+                <td><div class="radio-group"><label><input type="radio" name="freno_estacionamiento" value="M"> M</label></div></td>
+                <td><div class="radio-group"><label><input type="radio" name="freno_estacionamiento" value="NA"> N/A</label></div></td>
+            </tr>
+            <tr>
+                <td data-name="freno_pie">Freno de Pie</td>
+                <td><div class="radio-group"><label><input type="radio" name="freno_pie" value="B" required> B</label></div></td>
+                <td><div class="radio-group"><label><input type="radio" name="freno_pie" value="M"> M</label></div></td>
+                <td><div class="radio-group"><label><input type="radio" name="freno_pie" value="NA"> N/A</label></div></td>
+            </tr>
+            <tr>
+                <td data-name="vidrios_espejos">Vidrios y Espejos (Sin grietas)</td>
+                <td><div class="radio-group"><label><input type="radio" name="vidrios_espejos" value="B" required> B</label></div></td>
+                <td><div class="radio-group"><label><input type="radio" name="vidrios_espejos" value="M"> M</label></div></td>
+                <td><div class="radio-group"><label><input type="radio" name="vidrios_espejos" value="NA"> N/A</label></div></td>
+            </tr>
+            <tr>
+                <td data-name="radio">Radio y Sistema de Sonido (Funcionamiento)</td>
+                <td><div class="radio-group"><label><input type="radio" name="radio" value="B" required> B</label></div></td>
+                <td><div class="radio-group"><label><input type="radio" name="radio" value="M"> M</label></div></td>
+                <td><div class="radio-group"><label><input type="radio" name="radio" value="NA"> N/A</label></div></td>
+            </tr>
+            <tr>
+                <td data-name="aire_acondicionado">Aire Acondicionado</td>
+                <td><div class="radio-group"><label><input type="radio" name="aire_acondicionado" value="B" required> B</label></div></td>
+                <td><div class="radio-group"><label><input type="radio" name="aire_acondicionado" value="M"> M</label></div></td>
+                <td><div class="radio-group"><label><input type="radio" name="aire_acondicionado" value="NA"> N/A</label></div></td>
+            </tr>
+            <tr>
+                <td data-name="cinturones">Cinturones de Seguridad</td>
+                <td><div class="radio-group"><label><input type="radio" name="cinturones" value="B" required> B</label></div></td>
+                <td><div class="radio-group"><label><input type="radio" name="cinturones" value="M"> M</label></div></td>
+                <td><div class="radio-group"><label><input type="radio" name="cinturones" value="NA"> N/A</label></div></td>
+            </tr>
+            <tr>
+                <td data-name="asientos">Asientos y Tapicería (Estado general)</td>
+                <td><div class="radio-group"><label><input type="radio" name="asientos" value="B" required> B</label></div></td>
+                <td><div class="radio-group"><label><input type="radio" name="asientos" value="M"> M</label></div></td>
+                <td><div class="radio-group"><label><input type="radio" name="asientos" value="NA"> N/A</label></div></td>
+            </tr>
+            <tr>
+                <td data-name="bateria">Batería y Terminales</td>
+                <td><div class="radio-group"><label><input type="radio" name="bateria" value="B" required> B</label></div></td>
+                <td><div class="radio-group"><label><input type="radio" name="bateria" value="M"> M</label></div></td>
+                <td><div class="radio-group"><label><input type="radio" name="bateria" value="NA"> N/A</label></div></td>
+            </tr>
+            <tr>
+                <td data-name="herramientas">Gata, llave de ruedas, triángulos de seguridad</td>
+                <td><div class="radio-group"><label><input type="radio" name="herramientas" value="B" required> B</label></div></td>
+                <td><div class="radio-group"><label><input type="radio" name="herramientas" value="M"> M</label></div></td>
+                <td><div class="radio-group"><label><input type="radio" name="herramientas" value="NA"> N/A</label></div></td>
+            </tr>
+            <tr>
+                <td data-name="extintor_manometro">Extintor (Manómetro en verde)</td>
+                <td><div class="radio-group"><label><input type="radio" name="extintor_manometro" value="B" required> B</label></div></td>
+                <td><div class="radio-group"><label><input type="radio" name="extintor_manometro" value="M"> M</label></div></td>
+                <td><div class="radio-group"><label><input type="radio" name="extintor_manometro" value="NA"> N/A</label></div></td>
+            </tr>
+            <tr>
+                <td data-name="extintor_calcomania">Calcomanía del Extintor (Vigencia)</td>
+                <td><div class="radio-group"><label><input type="radio" name="extintor_calcomania" value="B" required> B</label></div></td>
+                <td><div class="radio-group"><label><input type="radio" name="extintor_calcomania" value="M"> M</label></div></td>
+                <td><div class="radio-group"><label><input type="radio" name="extintor_calcomania" value="NA"> N/A</label></div></td>
+            </tr>
+            <tr>
+                <td data-name="botiquin">Botiquín de Primeros Auxilios</td>
+                <td><div class="radio-group"><label><input type="radio" name="botiquin" value="B" required> B</label></div></td>
+                <td><div class="radio-group"><label><input type="radio" name="botiquin" value="M"> M</label></div></td>
+                <td><div class="radio-group"><label><input type="radio" name="botiquin" value="NA"> N/A</label></div></td>
+            </tr>
+            <tr>
+                <td data-name="kit_antiderrames">Kit Antiderrames</td>
+                <td><div class="radio-group"><label><input type="radio" name="kit_antiderrames" value="B" required> B</label></div></td>
+                <td><div class="radio-group"><label><input type="radio" name="kit_antiderrames" value="M"> M</label></div></td>
+                <td><div class="radio-group"><label><input type="radio" name="kit_antiderrames" value="NA"> N/A</label></div></td>
+            </tr>
+            <tr>
+                <td data-name="documentos_vehiculo">Documentos del Vehículo (Copia de Registro, etc.)</td>
+                <td><div class="radio-group"><label><input type="radio" name="documentos_vehiculo" value="B" required> B</label></div></td>
+                <td><div class="radio-group"><label><input type="radio" name="documentos_vehiculo" value="M"> M</label></div></td>
+                <td><div class="radio-group"><label><input type="radio" name="documentos_vehiculo" value="NA"> N/A</label></div></td>
+            </tr>
+            <tr>
+                <td data-name="mantenimiento_5000km">Mantenimiento de 5,000 KM (Próximo)</td>
+                <td><div class="radio-group"><label><input type="radio" name="mantenimiento_5000km" value="B" required> B</label></div></td>
+                <td><div class="radio-group"><label><input type="radio" name="mantenimiento_5000km" value="M"> M</label></div></td>
+                <td><div class="radio-group"><label><input type="radio" name="mantenimiento_5000km" value="NA"> N/A</label></div></td>
+            </tr>
+            <tr>
+                <td data-name="mantenimiento_10000km">Mantenimiento de 10,000 KM (Próximo)</td>
+                <td><div class="radio-group"><label><input type="radio" name="mantenimiento_10000km" value="B" required> B</label></div></td>
+                <td><div class="radio-group"><label><input type="radio" name="mantenimiento_10000km" value="M"> M</label></div></td>
+                <td><div class="radio-group"><label><input type="radio" name="mantenimiento_10000km" value="NA"> N/A</label></div></td>
+            </tr>
+        </tbody>
+    </table>
+</section>
+
+<section>
+    <h2>Observaciones y Evidencia</h2>
+    <div class="form-group">
+        <label for="observaciones"><i class="fas fa-clipboard"></i> Observaciones Generales (Daños, faltantes, etc.):</label>
+        <textarea id="observaciones" rows="4" placeholder="Detalle cualquier anomalía no cubierta en el checklist."></textarea>
+    </div>
+    
+    <div class="form-group">
+        <label for="fotos"><i class="fas fa-camera"></i> Adjuntar Fotos (Evidencia de fallos o estado general):</label>
+        <input type="file" id="fotos" accept="image/*" multiple class="no-print">
+        <div id="fotos-preview">
+            </div>
+    </div>
+</section>
+
+<section class="no-print">
+    <div class='actions'>
+        <button class='btn' onclick='nuevoFormulario()'><i class='fas fa-file-alt'></i> Nuevo formulario</button>
+        
+        <button class='btn' onclick='sendWhatsAppSummary()'><i class='fab fa-whatsapp'></i> Enviar Resumen de FALLOS (WhatsApp)</button>
+        <button class='btn' onclick='exportToExcel()'><i class='fas fa-file-excel'></i> Exportar a Excel</button>
+        <button class='btn' onclick='prepareAndPrint()'><i class='fas fa-print'></i> Imprimir / Generar PDF</button>
+    </div>
+</section>
+
+<section class='print-only'>
+    <table class='print-header-table'>
+        <tr><th colspan='4' class='section-title'>1. DATOS DEL VEHÍCULO Y GENERALES</th></tr>
+        <tr>
+            <td><strong>Vehículo Placa:</strong> <span id='print-vehiculo-placa'>[PENDIENTE]</span></td>
+            <td><strong>Marca:</strong> <span id='print-vehiculo-marca'>[PENDIENTE]</span></td>
+            <td><strong>Modelo:</strong> <span id='print-vehiculo-modelo'>[PENDIENTE]</span></td>
+            <td><strong>Conductor:</strong> <span id='print-conductor-nombre'>[PENDIENTE]</span></td>
+        </tr>
+        <tr>
+            <td><strong>N° Motor:</strong> <span id='print-vehiculo-motor'>[PENDIENTE]</span></td>
+            <td><strong>Año:</strong> <span id='print-vehiculo-anio'>[PENDIENTE]</span></td>
+            <td><strong>VIN:</strong> <span id='print-vehiculo-vin'>[PENDIENTE]</span></td>
+            <td><strong>Cédula:</strong> <span id='print-conductor-cedula'>[PENDIENTE]</span></td>
+        </tr>
+        <tr>
+            <td><strong>Mes de Placa:</strong> <span id='print-vehiculo-mes-placa'>[PENDIENTE]</span></td>
+            <td><strong>Constancia Sanitaria:</strong> <span id='print-constancia-sanitaria'>[PENDIENTE]</span></td>
+            <td><strong>Licencia Tipo:</strong> <span id='print-licencia-tipo'>[PENDIENTE]</span></td>
+            <td><strong># Constancia:</strong> <span id='print-constancia-numero'>[PENDIENTE]</span></td>
+        </tr>
+        <tr><th colspan='4' class='section-title'>2. DOCUMENTACIÓN DEL CONDUCTOR</th></tr>
+        <tr>
+            <td><strong>Tipo de Sangre:</strong> <span id='print-sangre'>[PENDIENTE]</span></td>
+            <td><strong>Cargo:</strong> <span id='print-cargo'>[PENDIENTE]</span></td>
+            <td><strong>Licencia Expira:</strong> <span id='print-exp-licencia'>[PENDIENTE]</span></td>
+            <td><strong>Carnet Salud:</strong> <span id='print-carnet-salud'>[PENDIENTE]</span></td>
+        </tr>
+        <tr>
+            <td><strong>Carnet Blanco Expira:</strong> <span id='print-exp-blanco'>[PENDIENTE]</span></td>
+            <td><strong>Carnet Verde Expira:</strong> <span id='print-exp-verde'>[PENDIENTE]</span></td>
+            <td colspan="2"></td>
+        </tr>
+    </table>
+
+    <h2 style='color: var(--primary); border-bottom: 2px solid #ddd; padding-bottom: 5px; margin-top: 20px; font-size: 1.5em;'>3. Puntos de Inspección</h2>
+    <table class="checklist-table print-checklist-table">
+        <thead>
+            <tr>
+                <th style="width: 70%; text-align: left;">Aspecto a Inspeccionar</th>
+                <th style="width: 10%;">B</th>
+                <th style="width: 10%;">M</th>
+                <th style="width: 10%;">N/A</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr style="background-color: #f2f2f2;"><td colspan="4" data-name="title"><strong>A. ASPECTOS MECÁNICOS Y EXTERIORES</strong></td></tr>
+            <tr><td data-name="aceite_motor">Nivel de Aceite del Motor</td><td></td><td></td><td></td></tr>
+            <tr><td data-name="liquido_frenos">Líquido de Frenos</td><td></td><td></td><td></td></tr>
+            <tr><td data-name="liquido_direccion">Líquido de Dirección</td><td></td><td></td><td></td></tr>
+            <tr><td data-name="refrigerante">Refrigerante (Agua)</td><td></td><td></td><td></td></tr>
+            <tr><td data-name="correas_mangueras">Correas de Motor y Mangueras</td><td></td><td></td><td></td></tr>
+            <tr><td data-name="motor_sin_fugas">Motor sin fugas visibles</td><td></td><td></td><td></td></tr>
+            <tr><td data-name="llantas">Llantas (Estado general, aire)</td><td></td><td></td><td></td></tr>
+            <tr><td data-name="llantas_repuesto">Llantas de Repuesto y Rines</td><td></td><td></td><td></td></tr>
+            <tr><td data-name="limpiaparabrisas">Limpiaparabrisas y nivel de agua</td><td></td><td></td><td></td></tr>
+            <tr><td data-name="carroceria">Estado de la Carrocería (Golpes/Rayones)</td><td></td><td></td><td></td></tr>
+            
+            <tr style="background-color: #f2f2f2;"><td colspan="4" data-name="title"><strong>B. CABINA, LUCES Y ACCESORIOS</strong></td></tr>
+            <tr><td data-name="tablero_medidores">Tablero y Medidores</td><td></td><td></td><td></td></tr>
+            <tr><td data-name="luces_bajas_altas">Luces Bajas/Altas</td><td></td><td></td><td></td></tr>
+            <tr><td data-name="luces_freno">Luces de Freno</td><td></td><td></td><td></td></tr>
+            <tr><td data-name="direccionales">Luces Direccionales y de Estacionamiento</td><td></td><td></td><td></td></tr>
+            <tr><td data-name="luces_retroceso">Luces de Retroceso</td><td></td><td></td><td></td></tr>
+            <tr><td data-name="claxon">Claxon (Bocina)</td><td></td><td></td><td></td></tr>
+            <tr><td data-name="freno_estacionamiento">Freno de Estacionamiento</td><td></td><td></td><td></td></tr>
+            <tr><td data-name="freno_pie">Freno de Pie</td><td></td><td></td><td></td></tr>
+            <tr><td data-name="vidrios_espejos">Vidrios y Espejos (Sin grietas)</td><td></td><td></td><td></td></tr>
+            <tr><td data-name="radio">Radio y Sistema de Sonido (Funcionamiento)</td><td></td><td></td><td></td></tr>
+            <tr><td data-name="aire_acondicionado">Aire Acondicionado</td><td></td><td></td><td></td></tr>
+            <tr><td data-name="cinturones">Cinturones de Seguridad</td><td></td><td></td><td></td></tr>
+            <tr><td data-name="asientos">Asientos y Tapicería (Estado general)</td><td></td><td></td><td></td></tr>
+            <tr><td data-name="bateria">Batería y Terminales</td><td></td><td></td><td></td></tr>
+            <tr><td data-name="herramientas">Gata, llave de ruedas, triángulos de seguridad</td><td></td><td></td><td></td></tr>
+            <tr><td data-name="extintor_manometro">Extintor (Manómetro en verde)</td><td></td><td></td><td></td></tr>
+            <tr><td data-name="extintor_calcomania">Calcomanía del Extintor (Vigencia)</td><td></td><td></td><td></td></tr>
+            <tr><td data-name="botiquin">Botiquín de Primeros Auxilios</td><td></td><td></td><td></td></tr>
+            <tr><td data-name="kit_antiderrames">Kit Antiderrames</td><td></td><td></td><td></td></tr>
+            <tr><td data-name="documentos_vehiculo">Documentos del Vehículo (Copia de Registro, etc.)</td><td></td><td></td><td></td></tr>
+            <tr><td data-name="mantenimiento_5000km">Mantenimiento de 5,000 KM (Próximo)</td><td></td><td></td><td></td></tr>
+            <tr><td data-name="mantenimiento_10000km">Mantenimiento de 10,000 KM (Próximo)</td><td></td><td></td><td></td></tr>
+        </tbody>
+    </table>
+    <div style="font-size: 10px; margin-top: -10px; margin-bottom: 10px; text-align: center;">
+        *La tabla superior se llena automáticamente con los datos del checklist del formulario.*
+    </div>
+
+
+    <h2 style='color: var(--primary); border-bottom: 2px solid #ddd; padding-bottom: 5px; margin-top: 20px; font-size: 1.5em;'>4. Observaciones y Firmas</h2>
+    <div style='margin-top: 20px; border: 1px solid #000; padding: 10px; font-size: 10px;'>
+        <p><strong>Ruta / Referencia del Viaje:</strong> <span id='print-ruta'>[PENDIENTE]</span></p>
+        <p><strong>Kilometraje / Horas:</strong> <span id='print-kilometraje'>[PENDIENTE]</span></p>
+        <hr style='border: none; border-top: 1px solid #ddd; margin: 5px 0;'>
+        <strong>Resumen de Puntos Malos (M):</strong>
+        <p id='print-resumen-m' style='white-space: pre-wrap; min-height: 20px; background-color: #ffe6e6; padding: 5px;'>[RESUMEN DE PUNTOS MALOS]</p>
+        <hr style='border: none; border-top: 1px solid #ddd; margin: 5px 0;'>
+        <strong>Observaciones Adicionales:</strong>
+        <p id='print-observaciones' style='white-space: pre-wrap; min-height: 20px;'>[OBSERVACIONES ADICIONALES]</p>
+    </div>
+
+    <div style='display: flex; justify-content: space-around; margin-top: 30px; text-align: center; font-size: 10px;'>
+        <div style='width: 40%; border-top: 1px solid #000; padding-top: 5px;'>Firma del Inspector</div>
+        <div style='width: 40%; border-top: 1px solid #000; padding-top: 5px;'>Firma del Conductor</div>
+    </div>
+
+    <div style='margin-top: 20px; page-break-before: always;'>
+        <h3 style='text-align: center;'>5. FOTOS ADJUNTAS</h3>
+        <div id='print-fotos-container'>
+            <p style='text-align: center; font-style: italic;'>No hay fotos adjuntas.</p>
+        </div>
+    </div>
+</section>
+
+
+<script src='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js'></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', init);
+    
+    let capturedPhotos = []; 
+    
+    // ==============================================================================
+    // ------ CONFIGURACIÓN DEL NÚMERO DE INSPECCIÓN ------
+    // ==============================================================================
+    const BASE_INSPECTION_ID = 'INS-20251125-'; // Prefijo y fecha fijos
+    const STARTING_SEQUENCE = 820; // Número inicial del formulario
+    const STORAGE_KEY = 'lastInspectionSequence';
+    
+    function getInitialInspectionSequence() {
+        let lastSequence = localStorage.getItem(STORAGE_KEY);
+        // Si no existe, usa el número inicial, de lo contrario, usa el último guardado
+        return lastSequence ? parseInt(lastSequence, 10) : STARTING_SEQUENCE;
+    }
+
+    function updateInspectionNumber(sequence) {
+        const newNumber = BASE_INSPECTION_ID + sequence;
+        
+        const displayHeader = document.getElementById('nroInspeccionDisplay');
+        if (displayHeader) {
+            displayHeader.textContent = newNumber;
+        }
+        
+        // Sincronizar el ID para la vista de impresión (aunque está oculto en la vista normal)
+        const displayPrint = document.getElementById('printNroInspeccion');
+        if (displayPrint) {
+            displayPrint.textContent = newNumber;
+        }
+        
+        localStorage.setItem(STORAGE_KEY, sequence);
+    }
+    
+    // ==============================================================================
+    // ------ BASES DE DATOS (Mantenidas de v05) ------
+    // ==============================================================================
+    const FLOTA_DATABASE = [
+        { placa: '392392', marca: 'TOYOTA', modelo: 'HIACE', anio: '2011', vin: 'JTFHK02PX00007035', motor_numero: 'JTFHK02PX00007035', tipo_combustible: 'Diesel', mes_placa: 'FEBRERO', constancia_sanitaria: 'SI', constancia_numero: '12345', tipo_vehiculo: 'VAN', tipo_inspeccion: 'LIVIANO'},
+        { placa: '572655', marca: 'NAVARA', modelo: 'NP300', anio: '2018', vin: 'VINEJEMPLO1', motor_numero: 'MOTORNP300', tipo_combustible: 'Diesel', mes_placa: 'DICIEMBRE', constancia_sanitaria: 'NO', constancia_numero: '', tipo_vehiculo: 'PICKUP', tipo_inspeccion: 'LIVIANO'},
+        { placa: '861734', marca: 'TOYOTA', modelo: 'HIACE', anio: '2009', vin: 'JTFHK02P800005994', motor_numero: '5L6117597', tipo_combustible: 'Diesel', mes_placa: 'MAYO', constancia_sanitaria: 'SI', constancia_numero: '54321', tipo_vehiculo: 'VAN', tipo_inspeccion: 'LIVIANO'},
+        { placa: '531246', marca: 'Master Switch', modelo: 'N/A', anio: '2020', vin: 'VINMASTERSWITCH', motor_numero: 'MOTORMS', tipo_combustible: 'Gasolina', mes_placa: 'MARZO', constancia_sanitaria: 'NO', constancia_numero: '', tipo_vehiculo: 'OTRO', tipo_inspeccion: 'N/A'},
+        { placa: 'AA2763', marca: 'TOYOTA', modelo: 'Hilux', anio: '2015', vin: 'VINHILUX1', motor_numero: 'MOTORHILUX1', tipo_combustible: 'Diesel', mes_placa: 'MAYO', constancia_sanitaria: 'SI', constancia_numero: '98765', tipo_vehiculo: 'PICKUP', tipo_inspeccion: 'LIVIANO'},
+        { placa: 'AA2770', marca: 'TOYOTA', modelo: 'Hilux', anio: '2015', vin: 'VINHILUX2', motor_numero: 'MOTORHILUX2', tipo_combustible: 'Diesel', mes_placa: 'MAYO', constancia_sanitaria: 'SI', constancia_numero: '67890', tipo_vehiculo: 'PICKUP', tipo_inspeccion: 'LIVIANO'},
+        { placa: 'AH2879', marca: 'CHEVROLET', modelo: 'NPRHD', anio: '2009', vin: 'J8BC4W16197000236', motor_numero: 'J8BC4W16197000236', tipo_combustible: 'Diesel', mes_placa: 'NOVIEMBRE', constancia_sanitaria: 'SI', constancia_numero: 'A1B2C3', tipo_vehiculo: 'CAMION', tipo_inspeccion: 'PESADO'},
+        { placa: 'AH2880', marca: 'ISUZU', modelo: 'NPR HD', anio: '2009', vin: 'JALC4W16097000249', motor_numero: 'JALC4W16097000249', tipo_combustible: 'Diesel', mes_placa: 'NOVIEMBRE', constancia_sanitaria: 'SI', constancia_numero: 'D4E5F6', tipo_vehiculo: 'CAMION', tipo_inspeccion: 'PESADO'},
+        { placa: 'AH2884', marca: 'CHEVROLET', modelo: 'W4500', anio: '2009', vin: 'J8BC4W16697000278', motor_numero: 'J8BC4W16697000278', tipo_combustible: 'Diesel', mes_placa: 'NOVIEMBRE', constancia_sanitaria: 'SI', constancia_numero: 'G7H8I9', tipo_vehiculo: 'CAMION', tipo_inspeccion: 'PESADO'},
+        { placa: 'AH-5380', marca: 'PENDIENTE', modelo: 'PENDIENTE', anio: 'N/A', vin: 'N/A', motor_numero: 'N/A', tipo_combustible: 'N/A', mes_placa: 'ENERO', constancia_sanitaria: 'NO', constancia_numero: '', tipo_vehiculo: 'PENDIENTE', tipo_inspeccion: 'N/A'},
+        { placa: '380485', marca: 'PENDIENTE', modelo: 'PENDIENTE', anio: 'N/A', vin: 'N/A', motor_numero: 'N/A', tipo_combustible: 'N/A', mes_placa: 'JULIO', constancia_sanitaria: 'NO', constancia_numero: '', tipo_vehiculo: 'PENDIENTE', tipo_inspeccion: 'N/A'},
+        { placa: 'AI-3043', marca: 'MERCEDES BENZ', modelo: 'ACTROS2631', anio: '2008', vin: 'WDAKHCAA49L387743', motor_numero: '5.4192E+13', tipo_combustible: 'Diesel', mes_placa: 'JULIO', constancia_sanitaria: 'SI', constancia_numero: 'J0K1L2', tipo_vehiculo: 'CABEZAL', tipo_inspeccion: 'PESADO'},
+        { placa: 'AI-3044', marca: 'MERCEDES BENZ', modelo: 'ACTROS2631', anio: '2008', vin: 'WDAKHCAA19L398229', motor_numero: 'WDAKHCAA19L398229', tipo_combustible: 'Diesel', mes_placa: 'JULIO', constancia_sanitaria: 'SI', constancia_numero: 'M3N4O5', tipo_vehiculo: 'CABEZAL', tipo_inspeccion: 'PESADO'},
+    ];
+    
+    const CONDUCTORES_DATABASE = [
+        { nombre: 'Samuel Perez', cedula: '9-752-60', sangre: 'O+', cargo: 'Auixiliar/Chofer', exp_licencia: '05-jul-23', tipo_licencia: 'D', carnet_salud: 'Si', carnet_blanco: '28-ene-25', carnet_verde: '28-ene-27' },
+        { nombre: 'Jonathan Lima', cedula: '8-123-456', sangre: 'O+', cargo: 'Conductor', exp_licencia: '17-feb-20', tipo_licencia: 'E3', carnet_salud: 'Si', carnet_blanco: '10-mar-25', carnet_verde: '10-mar-28' },
+        { nombre: 'Arturo Portugal', cedula: '9-187-534', sangre: 'A+', cargo: 'Conductor', exp_licencia: '09-abr-26', tipo_licencia: 'F', carnet_salud: 'Si', carnet_blanco: '14-sep-27', carnet_verde: '19-oct-22' }, /* Verde vencido */
+        { nombre: 'Jorge Hassan', cedula: '4-225-341', sangre: 'A+', cargo: 'Coordinador de Transporte', exp_licencia: 'N/A', tipo_licencia: 'N/A', carnet_salud: 'No', carnet_blanco: 'N/A', carnet_verde: 'N/A' },
+        { nombre: 'Alejandrino De Leon', cedula: '9-105-955', sangre: 'B-', cargo: 'Conductor', exp_licencia: '15-nov-20', tipo_licencia: 'D', carnet_salud: 'Si', carnet_blanco: '01-ene-24', carnet_verde: '01-ene-26' }, /* Licencia vencida */
+        { nombre: 'Sergio Arrocha', cedula: 'N/A', sangre: 'N/A', cargo: 'N/A', exp_licencia: 'N/A', tipo_licencia: 'N/A', carnet_salud: 'N/A', carnet_blanco: 'N/A', carnet_verde: 'N/A' },
+        { nombre: 'Rafael Santamaria', cedula: 'N/A', sangre: 'N/A', cargo: 'N/A', exp_licencia: 'N/A', tipo_licencia: 'N/A', carnet_salud: 'N/A', carnet_blanco: 'N/A', carnet_verde: 'N/A' },
+    ];
+
+
+    function init() {
+        updateInspectionNumber(getInitialInspectionSequence()); 
+        document.getElementById('fecha').valueAsDate = new Date();
+        populateSelects();
+        document.getElementById('fotos').addEventListener('change', handlePhotoUpload);
+    }
+
+    function populateSelects() {
+        const placaSelect = document.getElementById('vehiculo');
+        placaSelect.innerHTML = '<option value="">Seleccione...</option>';
+        FLOTA_DATABASE.forEach(veh => {
+            const option = new Option(veh.placa, veh.placa);
+            placaSelect.add(option);
+        });
+
+        const conductorSelect = document.getElementById('conductor');
+        conductorSelect.innerHTML = '<option value="">Seleccione...</option>';
+        CONDUCTORES_DATABASE.forEach(cond => {
+            const cedulaDisplay = cond.cedula && cond.cedula !== 'N/A' ? `${cond.cedula} - ` : '';
+            const option = new Option(`${cedulaDisplay}${cond.nombre}`, cond.nombre);
+            conductorSelect.add(option);
+        });
+    }
+    
+    function handlePhotoUpload(event) {
+        const files = event.target.files;
+        const previewContainer = document.getElementById('fotos-preview');
+        previewContainer.innerHTML = '';
+        capturedPhotos = []; 
+
+        if (files.length === 0) return;
+
+        Array.from(files).forEach((file, index) => {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const base64Image = e.target.result;
+                capturedPhotos.push({
+                    name: file.name,
+                    base64: base64Image
+                });
+
+                const img = document.createElement('img');
+                img.src = base64Image;
+                img.alt = `Foto ${index + 1}`;
+                img.title = file.name;
+                previewContainer.appendChild(img);
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+
+
+    function parseDateString(dateStr) {
+        if (!dateStr || dateStr === 'N/A') return null;
+        const monthMap = { 
+            'ene': 0, 'feb': 1, 'mar': 2, 'abr': 3, 'may': 4, 'jun': 5, 'jul': 6, 
+            'ago': 7, 'sep': 8, 'oct': 9, 'nov': 10, 'dic': 11 
+        };
+        const parts = dateStr.split('-');
+        if (parts.length === 3) {
+            const day = parseInt(parts[0], 10);
+            const month = monthMap[parts[1].toLowerCase()];
+            // Lógica para manejar años de dos dígitos (asumiendo 2000s)
+            let year = parseInt(parts[2], 10);
+            year = year < 50 ? 2000 + year : 1900 + year; // Asume que años < 50 son 20xx
+
+            if (month !== undefined) {
+                return new Date(year, month, day);
+            }
+        }
+        // Manejo de formatos tipo AAAA-MM-DD
+        const dateObj = new Date(dateStr);
+        if (!isNaN(dateObj) && dateStr.length > 5) return dateObj;
+
+        return null;
+    }
+
+    function getStatusHtml(dateStr) {
+        if (!dateStr || dateStr === 'N/A') return '<span style="color: grey;">N/D</span>';
+        const date = parseDateString(dateStr);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        if (date && date < today) {
+            return `<span style="color: var(--danger); font-weight: bold;">${dateStr} (VENCIDO)</span>`;
+        }
+        return dateStr;
+    }
+
+    // ==============================================================================
+    // ------ FUNCIÓN PARA LIMPIAR Y GENERAR NUEVO FORMULARIO ------
+    // ==============================================================================
+
+    function limpiarCampos() {
+        document.getElementById('fecha').valueAsDate = new Date();
+        document.getElementById('ruta').value = '';
+        document.getElementById('kilometraje').value = '';
+        document.getElementById('observaciones').value = '';
+        
+        document.getElementById('conductor').selectedIndex = 0;
+        document.getElementById('infoConductor').style.display = 'none';
+        document.getElementById('infoConductor').innerHTML = '';
+        document.getElementById('vehiculo').selectedIndex = 0;
+        document.getElementById('infoVehiculo').style.display = 'none';
+        document.getElementById('infoVehiculo').innerHTML = '';
+
+        document.querySelectorAll('input[type=radio]').forEach(radio => {
+            radio.checked = false;
+        });
+
+        const fotosInput = document.getElementById('fotos');
+        if (fotosInput) {
+            fotosInput.value = ''; 
+        }
+        document.getElementById('fotos-preview').innerHTML = ''; 
+        capturedPhotos = []; 
+        
+        window.scrollTo(0, 0);
+    }
+    
+    function nuevoFormulario() {
+        limpiarCampos();
+        
+        let currentSequence = getInitialInspectionSequence();
+        let newSequence = currentSequence + 1;
+        
+        updateInspectionNumber(newSequence);
+        
+        alert(`Formulario reiniciado. Nuevo N° Inspección: ${BASE_INSPECTION_ID}${newSequence}`);
+    }
+
+
+    // ==============================================================================
+    // ------ FUNCIONES DE IMPRESIÓN (Lógica sincronizada de v05) ------
+    // ==============================================================================
+
+    function syncPrintView() {
+        try {
+            const placa = document.getElementById('vehiculo').value;
+            const conductorNombre = document.getElementById('conductor').value;
+            const ruta = document.getElementById('ruta').value;
+            const kilometraje = document.getElementById('kilometraje').value;
+            const observaciones = document.getElementById('observaciones').value;
+            const nroInspeccion = document.getElementById('nroInspeccionDisplay').textContent;
+            
+            // --- 1. Sincronizar datos de Conductor y Vehículo
+            const conductorData = CONDUCTORES_DATABASE.find(c => c.nombre === conductorNombre) || {};
+            const vehiculoData = FLOTA_DATABASE.find(v => v.placa === placa) || {};
+
+            // Conductor Data (Tablas de Encabezado)
+            document.getElementById('print-conductor-nombre').textContent = conductorNombre || '[N/A]';
+            document.getElementById('print-conductor-cedula').textContent = conductorData.cedula || '[N/A]';
+            document.getElementById('print-sangre').textContent = conductorData.sangre || '[N/A]';
+            document.getElementById('print-cargo').textContent = conductorData.cargo || '[N/A]';
+            document.getElementById('print-licencia-tipo').textContent = conductorData.tipo_licencia || '[N/A]';
+            document.getElementById('print-exp-licencia').textContent = conductorData.exp_licencia || '[N/A]';
+            document.getElementById('print-carnet-salud').textContent = conductorData.carnet_salud || '[N/A]';
+            document.getElementById('print-exp-blanco').textContent = conductorData.carnet_blanco || '[N/A]';
+            document.getElementById('print-exp-verde').textContent = conductorData.carnet_verde || '[N/A]';
+
+            // Vehículo Data (Tablas de Encabezado)
+            document.getElementById('print-vehiculo-placa').textContent = placa || '[N/A]';
+            document.getElementById('print-vehiculo-marca').textContent = vehiculoData.marca || '[N/A]';
+            document.getElementById('print-vehiculo-modelo').textContent = vehiculoData.modelo || '[N/A]';
+            document.getElementById('print-vehiculo-motor').textContent = vehiculoData.motor_numero || '[N/A]';
+            document.getElementById('print-vehiculo-anio').textContent = vehiculoData.anio || '[N/A]';
+            document.getElementById('print-vehiculo-vin').textContent = vehiculoData.vin || '[N/A]';
+            document.getElementById('print-vehiculo-mes-placa').textContent = vehiculoData.mes_placa || '[N/A]';
+            document.getElementById('print-constancia-sanitaria').textContent = vehiculoData.constancia_sanitaria || '[N/A]';
+            document.getElementById('print-constancia-numero').textContent = vehiculoData.constancia_numero || '[N/A]';
+            
+            // Datos de Viaje y Observaciones (Sección de Observaciones)
+            document.getElementById('print-ruta').textContent = ruta || '[N/A]';
+            document.getElementById('print-kilometraje').textContent = kilometraje || '[N/A]';
+            document.getElementById('print-observaciones').textContent = observaciones || '[Ninguna]';
+            
+            // Sincronizar Número de Inspección
+            document.getElementById('printNroInspeccion').textContent = nroInspeccion;
+            
+
+            // --- 2. Checklist: Marcar B/M/N/A y generar resumen de fallos
+            const radios = document.querySelectorAll('input[type=radio]:checked');
+            let maloPoints = []; // Inicializar para el resumen
+            
+            // 2a. Limpiar 'X' previos en las celdas de resultado (columnas 1, 2, 3)
+            document.querySelectorAll('.print-only .print-checklist-table tbody > tr > td:not(:first-child)').forEach(td => {
+                td.textContent = '';
+            });
+
+            radios.forEach(el => {
+                const name = el.name;
+                const value = el.value; // B, M, o NA
+                
+                // Buscar la celda descriptiva por el atributo data-name en la vista de impresión
+                const cellDesc = document.querySelector(`.print-only .print-checklist-table td[data-name="${name}"]`);
+                
+                if (cellDesc) {
+                    const parentRow = cellDesc.parentElement;
+                    let colIndex = value === 'B' ? 1 : value === 'M' ? 2 : 3;
+                    
+                    if (parentRow.children[colIndex]) {
+                        parentRow.children[colIndex].textContent = 'X';
+                        
+                        // Capturar puntos Malo
+                        if (value === 'M') {
+                            maloPoints.push(cellDesc.textContent.trim());
+                        }
+                    }
+                }
+            });
+
+            // --- 3. Generar resumen de puntos malos (Sección de Observaciones)
+            const resumenM = document.getElementById('print-resumen-m');
+            if (maloPoints.length > 0) {
+                resumenM.textContent = maloPoints.map(p => `- ${p}`).join('\n');
+                resumenM.style.backgroundColor = '#ffe0e0'; 
+            } else {
+                resumenM.textContent = 'Ningún punto marcado como MALO (M).';
+                resumenM.style.backgroundColor = '#e6ffe6';
+            }
+
+        } catch (e) {
+            console.error("Error al sincronizar datos para impresión:", e);
+        }
+    }
+    
+    // ** FUNCIÓN ASÍNCRONA PARA CARGAR FOTOS **
+    function loadPhotosForPrint() {
+        return new Promise(resolve => {
+            const fotosInput = document.getElementById('fotos');
+            const fotosContainer = document.getElementById('print-fotos-container');
+            
+            fotosContainer.innerHTML = ''; 
+            const files = Array.from(fotosInput.files).filter(file => file.type.startsWith('image/'));
+            
+            if (files.length === 0) {
+                fotosContainer.innerHTML = '<div style="font-size: 10px; text-align: center; width: 100%;">No se adjuntaron fotos.</div>';
+                return resolve();
+            }
+
+            let loadedCount = 0;
+            const totalFiles = files.length;
+            
+            files.forEach(file => {
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    const imgDiv = document.createElement('div');
+                    imgDiv.style.margin = '5px';
+                    imgDiv.style.breakInside = 'avoid'; 
+                    
+                    const img = document.createElement('img');
+                    img.src = e.target.result; 
+                    img.alt = file.name;
+                    img.style.maxWidth = '150px'; 
+                    img.style.maxHeight = '150px';
+                    img.style.objectFit = 'contain';
+                    img.style.border = '1px solid #ddd';
+                    img.style.display = 'block';
+                    
+                    const caption = document.createElement('span');
+                    caption.textContent = file.name;
+                    caption.style.display = 'block';
+                    caption.style.fontSize = '9px';
+                    caption.style.textAlign = 'center';
+
+                    imgDiv.appendChild(img);
+                    imgDiv.appendChild(caption);
+                    fotosContainer.appendChild(imgDiv);
+
+                    loadedCount++;
+                    if (loadedCount === totalFiles) {
+                        resolve(); 
+                    }
+                };
+                
+                reader.onerror = function() {
+                    console.error('Error loading file:', file.name);
+                    loadedCount++;
+                    if (loadedCount === totalFiles) {
+                        resolve();
+                    }
+                }
+
+                reader.readAsDataURL(file);
+            });
+        });
+    }
+
+    // ** MANEJADOR PARA EL BOTÓN DE IMPRIMIR **
+    function prepareAndPrint() {
+        // 1. Sincroniza los datos (General y Checklist)
+        syncPrintView();
+        
+        // 2. Carga las fotos de forma asíncrona. Una vez terminado, llama a window.print()
+        loadPhotosForPrint().then(() => {
+            window.print();
+        }).catch(err => {
+            console.error("Error en el proceso de carga de fotos, imprimiendo sin ellas:", err);
+            window.print();
+        });
+    }
+
+    // ==============================================================================
+    // ------ OTRAS FUNCIONES (Mantenidas de v05) ------
+    // ==============================================================================
+
+    function mostrarConductor() { 
+        const nombre = document.getElementById('conductor').value;
+        const infoPanel = document.getElementById('infoConductor');
+        infoPanel.style.display = 'none';
+
+        if (!nombre) return;
+
+        const conductor = CONDUCTORES_DATABASE.find(c => c.nombre === nombre);
+        
+        if (conductor) {
+            infoPanel.style.display = 'block';
+            infoPanel.classList.remove('status-active', 'status-inactive', 'status-warning');
+
+            let isExpired = false;
+            let expirationMessage = '';
+            
+            const expLicenciaDate = parseDateString(conductor.exp_licencia);
+            if (expLicenciaDate && expLicenciaDate < new Date()) {
+                isExpired = true;
+                expirationMessage += ' Licencia VENCIDA. ';
+            }
+
+            const expBlancoDate = parseDateString(conductor.carnet_blanco);
+            if (expBlancoDate && expBlancoDate < new Date()) {
+                // Solo si no está vencido ya por la licencia
+                isExpired = true;
+                expirationMessage += ' Carnet Blanco VENCIDO. ';
+            }
+            
+            const expVerdeDate = parseDateString(conductor.carnet_verde);
+            if (expVerdeDate && expVerdeDate < new Date()) {
+                isExpired = true;
+                expirationMessage += ' Carnet Verde VENCIDO. ';
+            }
+
+            if (isExpired) {
+                infoPanel.classList.add('status-warning');
+            } else if (conductor.cedula && conductor.cedula !== 'N/A') {
+                infoPanel.classList.add('status-active');
+            } else {
+                 infoPanel.classList.add('status-inactive');
+            }
+
+            infoPanel.innerHTML = `
+                ${expirationMessage ? `<div style="color: var(--danger); font-weight: bold; margin-bottom: 5px;"><i class="fas fa-exclamation-triangle"></i> ADVERTENCIA: ${expirationMessage.trim()}</div><hr style="border: none; border-top: 1px dashed orange; margin: 5px 0;">` : ''}
+                
+                <span><strong>Cédula:</strong> ${conductor.cedula || 'N/D'} | <strong>Cargo:</strong> ${conductor.cargo || 'N/D'} | <strong>Tipo de Sangre:</strong> ${conductor.sangre || 'N/D'}</span>
+                <hr style="border: none; border-top: 1px dashed #ccc; margin: 5px 0;">
+                <span><strong>Tipo Licencia:</strong> ${conductor.tipo_licencia || 'N/D'} | <strong>Fecha Exp. Licencia:</strong> ${getStatusHtml(conductor.exp_licencia)}</span>
+                <span><strong>Carnet Salud:</strong> ${conductor.carnet_salud || 'N/D'} | <strong>Carnet Blanco Expira:</strong> ${getStatusHtml(conductor.carnet_blanco)}</span>
+                <span><strong>Carnet Verde Expira:</strong> ${getStatusHtml(conductor.carnet_verde)}</span>
+            `;
+        } else {
+            infoPanel.style.display = 'block';
+            infoPanel.classList.add('status-inactive');
+            infoPanel.innerHTML = `<span>⚠️ Conductor no encontrado en la base de datos.</span>`;
+        }
+    }
+
+    function mostrarVehiculo() {
+        const placa = document.getElementById('vehiculo').value;
+        const infoPanel = document.getElementById('infoVehiculo');
+        infoPanel.style.display = 'none';
+
+        if (!placa) return;
+
+        const vehiculo = FLOTA_DATABASE.find(v => v.placa === placa);
+        
+        if (vehiculo) {
+            infoPanel.style.display = 'block';
+            infoPanel.classList.remove('status-inactive');
+            infoPanel.classList.add('status-active');
+            
+            infoPanel.innerHTML = `
+                <span><strong>Marca:</strong> ${vehiculo.marca || 'N/A'} | <strong>Modelo:</strong> ${vehiculo.modelo || 'N/A'} | <strong>Año:</strong> ${vehiculo.anio || 'N/A'}</span>
+                <span><strong>Tipo Vehículo:</strong> ${vehiculo.tipo_vehiculo || 'N/A'} | <strong>Tipo Inspección:</strong> ${vehiculo.tipo_inspeccion || 'N/A'} | <strong>Combustible:</strong> ${vehiculo.tipo_combustible || 'N/A'}</span>
+                <hr style="border: none; border-top: 1px dashed var(--primary); margin: 5px 0;">
+                <span><strong>VIN:</strong> ${vehiculo.vin || 'N/A'} | <strong>N° Motor:</strong> ${vehiculo.motor_numero || 'N/A'}</span>
+                <span><strong>Mes de Placa:</strong> ${vehiculo.mes_placa || 'N/A'} | <strong>Constancia Sanitaria:</strong> ${vehiculo.constancia_sanitaria || 'N/A'} (${vehiculo.constancia_numero || 'N/A'})</span>
+            `;
+
+        } else {
+            infoPanel.style.display = 'block';
+            infoPanel.classList.remove('status-active');
+            infoPanel.classList.add('status-inactive');
+            infoPanel.innerHTML = `<span>⚠️ Placa no encontrada en la base de datos de la flota.</span>`;
+        }
+    }
+
+    function exportToExcel() { 
+        let data = [];
+        data.push({Campo: 'Número de Inspección', Valor: document.getElementById('nroInspeccionDisplay').textContent}); 
+        data.push({Campo: 'Fecha', Valor: document.getElementById('fecha').value});
+        data.push({Campo: 'Ruta', Valor: document.getElementById('ruta').value});
+        data.push({Campo: 'Kilometraje', Valor: document.getElementById('kilometraje').value});
+        data.push({Campo: 'Conductor', Valor: document.getElementById('conductor').value});
+        
+        const conductorNombre = document.getElementById('conductor').value;
+        const conductorData = CONDUCTORES_DATABASE.find(c => c.nombre === conductorNombre);
+        if (conductorData) {
+            data.push({Campo: 'Conductor - Cédula', Valor: conductorData.cedula || 'N/D'});
+            data.push({Campo: 'Conductor - Tipo de Sangre', Valor: conductorData.sangre || 'N/D'});
+            data.push({Campo: 'Conductor - Cargo', Valor: conductorData.cargo || 'N/D'});
+            data.push({Campo: 'Conductor - Tipo Licencia', Valor: conductorData.tipo_licencia || 'N/D'});
+            data.push({Campo: 'Conductor - Expira Licencia', Valor: conductorData.exp_licencia || 'N/D'});
+            data.push({Campo: 'Conductor - Carnet Salud', Valor: conductorData.carnet_salud || 'N/D'});
+            data.push({Campo: 'Conductor - Carnet Blanco', Valor: conductorData.carnet_blanco || 'N/D'});
+            data.push({Campo: 'Conductor - Carnet Verde', Valor: conductorData.carnet_verde || 'N/D'});
+        }
+
+        const vehiculoPlaca = document.getElementById('vehiculo').value;
+        const vehiculoData = FLOTA_DATABASE.find(v => v.placa === vehiculoPlaca);
+        if (vehiculoData) {
+            data.push({Campo: 'Vehículo - Placa', Valor: vehiculoPlaca || 'N/D'});
+            data.push({Campo: 'Vehículo - Marca', Valor: vehiculoData.marca || 'N/D'});
+            data.push({Campo: 'Vehículo - Modelo', Valor: vehiculoData.modelo || 'N/D'});
+            data.push({Campo: 'Vehículo - VIN', Valor: vehiculoData.vin || 'N/D'});
+            data.push({Campo: 'Vehículo - N° Motor', Valor: vehiculoData.motor_numero || 'N/D'});
+        }
+
+        data.push({Campo: '*** CHECKLIST ***', Valor: ''});
+        const radios = document.querySelectorAll('input[type=radio]:checked');
+        radios.forEach(el => { 
+            // Buscar el nombre del aspecto
+            const td = document.querySelector(`.checklist-table td[data-name="${el.name}"]`);
+            const aspectName = td ? td.textContent.trim() : el.name.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+            data.push({Campo: aspectName, Valor: el.value}); 
+        });
+
+        const ws1 = XLSX.utils.json_to_sheet(data);
+        ws1['!cols'] = [{wch: 40}, {wch: 50}];
+
+        let obs = [];
+        obs.push({Detalle: 'Observaciones', Comentario: document.getElementById('observaciones').value});
+        const fotosInput = document.getElementById('fotos');
+        Array.from(fotosInput.files).forEach(file => {
+            obs.push({Detalle: 'Foto', Comentario: file.name});
+        });
+
+        const ws2 = XLSX.utils.json_to_sheet(obs);
+        ws2['!cols'] = [{wch: 40}, {wch: 50}];
+
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws1, 'Reporte Completo');
+        XLSX.utils.book_append_sheet(wb, ws2, 'Observaciones');
+        XLSX.writeFile(wb, 'reporte_inspeccion_con_numero.xlsx');
+    }
+
+    function sendWhatsAppSummary() { 
+        const nroInspeccion = document.getElementById('nroInspeccionDisplay').textContent;
+        const fecha = document.getElementById('fecha').value;
+        const conductor = document.getElementById('conductor').value;
+        const vehiculoPlaca = document.getElementById('vehiculo').value;
+        const ruta = document.getElementById('ruta').value;
+        
+        let checklistSummary = '';
+        const radios = document.querySelectorAll('input[type=radio]:checked');
+        const issues = Array.from(radios).filter(el => el.value === 'M'); 
+        
+        if (issues.length > 0) {
+            checklistSummary = issues.map(el => {
+                // Formatear el nombre del aspecto para el mensaje
+                const td = document.querySelector(`.checklist-table td[data-name="${el.name}"]`);
+                const aspectName = td ? td.textContent.trim() : el.name.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                return `\n- ${aspectName}`;
+            }).join('');
+        } else {
+            checklistSummary = '\n- No se detectaron fallos mecánicos o de cabina.';
+        }
+        
+        let documentAlert = '';
+        const conductorInfo = CONDUCTORES_DATABASE.find(c => c.nombre === conductor);
+        if (conductorInfo) {
+            const expLicenciaDate = parseDateString(conductorInfo.exp_licencia);
+            const expBlancoDate = parseDateString(conductorInfo.carnet_blanco);
+            const expVerdeDate = parseDateString(conductorInfo.carnet_verde);
+            const today = new Date();
+            today.setHours(0,0,0,0);
+            
+            let alerts = [];
+            if (expLicenciaDate && expLicenciaDate < today) alerts.push('Licencia');
+            if (expBlancoDate && expBlancoDate < today) alerts.push('Carnet Blanco');
+            if (expVerdeDate && expVerdeDate < today) alerts.push('Carnet Verde');
+            
+            if (alerts.length > 0) {
+                 documentAlert = `🚨 *ATENCIÓN:* ${alerts.join(', ')} VENCIDO(S).`;
+            }
+        }
+        
+        let photoSummary = `(Fotos adjuntas: ${document.getElementById('fotos').files.length})`;
+
+        let message = `*INFORME DE INSPECCIÓN (FALLOS)*\n`;
+        message += `*N°:* ${nroInspeccion} | *Fecha:* ${fecha}\n`;
+        message += `*Conductor:* ${conductor || '[Pendiente]'}\n`;
+        message += `*Vehículo (Placa):* ${vehiculoPlaca || '[Pendiente]'}\n`;
+        message += `*Ruta/Ref:* ${ruta || '[N/A]'}\n`;
+        message += `------------------------------\n`;
+        
+        if (documentAlert) {
+            message += `${documentAlert}\n`;
+        }
+        
+        message += `*Puntos con estado MALO (M):*${checklistSummary}\n`;
+        message += `------------------------------\n`;
+        message += `*Observaciones:* ${document.getElementById('observaciones').value || 'Ninguna'}\n`;
+        message += `${photoSummary}\n`;
+
+        const encodedMessage = encodeURIComponent(message);
+        const whatsappUrl = `https://wa.me/?text=${encodedMessage}`; 
+        
+        window.open(whatsappUrl, '_blank');
+    }
+
+</script>
+
+<h3>4. Observaciones y Firmas</h3>
+<p>Firma del Inspector:<br><canvas id='firmaInspectorCanvas' style='border:1px solid #000; width:100%; height:150px;'></canvas></p>
+<canvas id='firmaInspector' width='300' height='150'></canvas>
+<button onclick="limpiarFirma('firmaInspector')">Limpiar</button>
+
+<p>Firma del Conductor:<br><canvas id='firmaConductorCanvas' style='border:1px solid #000; width:100%; height:150px;'></canvas></p>
+<canvas id='firmaConductor' width='300' height='150'></canvas>
+<button onclick="limpiarFirma('firmaConductor')">Limpiar</button>
+
+<button onclick="guardarFirmas()">Guardar Firmas</button>
+<button onclick="exportarPDF()">Exportar a PDF</button>
+
+<script src='https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js'></script>
+<script>
+function activarFirma(canvasId) {
+    const canvas = document.getElementById(canvasId);
+    const ctx = canvas.getContext('2d');
+    let dibujando = false;
+
+    function getPos(e) {
+        const rect = canvas.getBoundingClientRect();
+        return {
+            x: (e.touches ? e.touches[0].clientX : e.clientX) - rect.left,
+            y: (e.touches ? e.touches[0].clientY : e.clientY) - rect.top
+        };
+    }
+
+    canvas.addEventListener('mousedown', () => dibujando = true);
+    canvas.addEventListener('mouseup', () => {dibujando = false; ctx.beginPath();});
+    canvas.addEventListener('mousemove', (e) => {
+        if (!dibujando) return;
+        const pos = getPos(e);
+        ctx.lineWidth = 2;
+        ctx.lineCap = 'round';
+        ctx.strokeStyle = '#000';
+        ctx.lineTo(pos.x, pos.y);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(pos.x, pos.y);
+    });
+
+    canvas.addEventListener('touchstart', () => dibujando = true);
+    canvas.addEventListener('touchend', () => {dibujando = false; ctx.beginPath();});
+    canvas.addEventListener('touchmove', (e) => {
+        e.preventDefault();
+        if (!dibujando) return;
+        const pos = getPos(e);
+        ctx.lineWidth = 2;
+        ctx.lineCap = 'round';
+        ctx.strokeStyle = '#000';
+        ctx.lineTo(pos.x, pos.y);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(pos.x, pos.y);
+    });
+}
+
+function limpiarFirma(canvasId) {
+    const canvas = document.getElementById(canvasId);
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+}
+
+function guardarFirmas() {
+    const inspectorData = document.getElementById('firmaInspector').toDataURL();
+    const conductorData = document.getElementById('firmaConductor').toDataURL();
+    alert('Firmas guardadas en memoria.');
+    console.log('Inspector:', inspectorData);
+    console.log('Conductor:', conductorData);
+}
+
+function exportarPDF() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    const logo = document.querySelector('header img');
+    const logoData = logo ? logo.src : '';
+
+    if (logoData) {
+        doc.addImage(logoData, 'PNG', 10, 10, 30, 30);
+    }
+    doc.setFontSize(16);
+    doc.setTextColor(0,64,128);
+    doc.text('Inspección Vehicular - Infreserve', 50, 20);
+    doc.setFontSize(12);
+    doc.setTextColor(0);
+    doc.text('Ruta / Referencia del Viaje: [PENDIENTE]', 10, 50);
+    doc.text('Kilometraje / Horas: [PENDIENTE]', 10, 60);
+    doc.text('Observaciones:', 10, 70);
+    doc.addImage(document.getElementById('firmaInspector').toDataURL(), 'PNG', 10, 80, 60, 30);
+    doc.addImage(document.getElementById('firmaConductor').toDataURL(), 'PNG', 10, 120, 60, 30);
+    doc.save('inspeccion_vehicular_infreserve.pdf');
+}
+
+activarFirma('firmaInspector');
+activarFirma('firmaConductor');
+</script>
+
+<!-- Librerías necesarias -->
+<script src='https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js'></script>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js'></script>
+<script src='https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js'></script>
+<script>
+    // Inicializamos SignaturePad para ambos canvas
+    const canvasInspector = document.getElementById('firmaInspectorCanvas');
+    const canvasConductor = document.getElementById('firmaConductorCanvas');
+
+    const signatureInspector = new SignaturePad(canvasInspector);
+    const signatureConductor = new SignaturePad(canvasConductor);
+
+    // Reemplazamos la acción del botón de imprimir por la generación del PDF con html2canvas
+    const exportBtn = document.querySelector("button[onclick*='Imprimir']") || document.getElementById('exportarPDF');
+
+    if (exportBtn) {
+        exportBtn.addEventListener('click', function (e) {
+            e.preventDefault();
+            const formulario = document.body; // Captura todo el contenido visible
+
+            html2canvas(formulario, { scale: 2 }).then(canvas => {
+                const imgData = canvas.toDataURL('image/png');
+                const pdf = new jsPDF('p', 'mm', 'a4');
+                const imgWidth = 210;
+                const pageHeight = 297;
+                const imgHeight = canvas.height * imgWidth / canvas.width;
+                let heightLeft = imgHeight;
+                let position = 0;
+
+                pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                heightLeft -= pageHeight;
+
+                while (heightLeft > 0) {
+                    position = heightLeft - imgHeight;
+                    pdf.addPage();
+                    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                    heightLeft -= pageHeight;
+                }
+
+                pdf.save('InspeccionVehicular.pdf');
+            });
+        });
+    }
+</script>
+
+</body>
+</html>
